@@ -13,60 +13,38 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- **/
-
+ */
 package com.bellande_api.bellande_radar;
 
-import java.io.File;
 import java.io.IOException;
-
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class bellande_radar_service {
-    private final bellande_radar_api storageUsageApi;
+    private final bellande_radar_api radarApi;
     private final String apiAccessKey;
-    private final String inputEndpoint;
-    private final String outputEndpoint;
+    private final String radarEndpoint;
 
-    public bellande_radar_service(String apiUrl, String inputEndpoint, String outputEndpoint, String apiAccessKey, bellande_radar_api storageUsageApi) {
-        this.storageUsageApi = storageUsageApi;
+    public bellande_radar_service(String apiUrl, String radarEndpoint, String apiAccessKey, bellande_radar_api radarApi) {
+        this.radarApi = radarApi;
         this.apiAccessKey = apiAccessKey;
-        this.inputEndpoint = inputEndpoint;
-        this.outputEndpoint = outputEndpoint;
+        this.radarEndpoint = radarEndpoint;
     }
 
-    public String getRadarUsage(String connectivityPasscode) {
-        bellande_radar_api.RequestBody apiRequestBody = new bellande_radar_api.RequestBody("get_radar", connectivityPasscode);
-
-        try {
-            Response<bellande_radar_api.BellandeResponse> response = storageUsageApi.getBellandeResponse(inputEndpoint, apiRequestBody, apiAccessKey).execute();
-            if (response.isSuccessful() && response.body() != null) {
-                return response.body().getCameraUsage();
-            } else {
-                throw new RuntimeException("Error getting RADAR usage: " + response.code() + " - " + response.message());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Error getting RADAR usage: " + e.getMessage());
+    public bellande_radar_api.BellandeResponse sendRadarData(String radarData, String connectivityPasscode) throws IOException {
+        bellande_radar_api.RequestBody requestBody = new bellande_radar_api.RequestBody(connectivityPasscode, "send_data", radarData);
+        Response<bellande_radar_api.BellandeResponse> response = radarApi.sendRadarData(radarEndpoint, requestBody, apiAccessKey).execute();
+        if (!response.isSuccessful()) {
+            throw new IOException("Failed to send Radar data: " + response.code() + " - " + response.message());
         }
+        return response.body();
     }
 
-    public String sendRadarUsage(String cpuUsage, String connectivityPasscode) {
-        bellande_radar_api.RequestBody apiRequestBody = new bellande_radar_api.RequestBody(cpuUsage, connectivityPasscode);
-
-        try {
-            Response<bellande_radar_api.BellandeResponse> response = storageUsageApi.sendBellandeResponse(outputEndpoint, apiRequestBody, apiAccessKey).execute();
-            if (response.isSuccessful() && response.body() != null) {
-                return response.body().getStatus();
-            } else {
-                throw new RuntimeException("Error sending RADAR usage: " + response.code() + " - " + response.message());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Error sending RADAR usage: " + e.getMessage());
+    public String receiveLidarData(String connectivityPasscode) throws IOException {
+        bellande_radar_api.RequestBody requestBody = new bellande_radar_api.RequestBody(connectivityPasscode, "receive_data", null);
+        Response<bellande_radar_api.BellandeResponse> response = radarApi.receiveRadarData(radarEndpoint, requestBody, apiAccessKey).execute();
+        if (!response.isSuccessful()) {
+            throw new IOException("Failed to receive Radar data: " + response.code() + " - " + response.message());
         }
+        return response.body().getRadarData();
     }
 }

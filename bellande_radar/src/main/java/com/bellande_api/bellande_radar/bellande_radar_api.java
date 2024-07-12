@@ -24,31 +24,42 @@ import retrofit2.http.Url;
 
 public interface bellande_radar_api {
     @POST
-    Call<BellandeResponse> getBellandeResponse(@Url String url, @Body RequestBody body, @Header("Bellande-Framework-Access-Key") String apiKey);
+    Call<BellandeResponse> sendRadarData(@Url String url,
+                                         @Body RequestBody body,
+                                         @Header("Bellande-Framework-Access-Key") String apiKey);
 
     @POST
-    Call<BellandeResponse> sendBellandeResponse(@Url String url, @Body RequestBody body, @Header("Bellande-Framework-Access-Key") String apiKey);
+    Call<BellandeResponse> receiveRadarData(@Url String url,
+                                            @Body RequestBody body,
+                                            @Header("Bellande-Framework-Access-Key") String apiKey);
 
     class RequestBody {
-        private final String input;
         private final String connectivityPasscode;
+        private final String action;
+        private final String data;
 
-        public RequestBody(String input, String connectivityPasscode) {
-            this.input = input;
+        public RequestBody(String connectivityPasscode, String action, String data) {
             this.connectivityPasscode = connectivityPasscode;
+            this.action = action;
+            this.data = data;
         }
     }
 
     class BellandeResponse {
-        private String cpuUsage;
         private String status;
-
-        public String getCameraUsage() {
-            return cpuUsage;
-        }
+        private String message;
+        private String radarData;
 
         public String getStatus() {
             return status;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public String getRadarData() {
+            return radarData;
         }
     }
 }

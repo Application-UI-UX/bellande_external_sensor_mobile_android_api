@@ -18,6 +18,7 @@ package com.bellande_api.bellande_radar;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.gson.Gson;
@@ -31,25 +32,24 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class bellande_radar_activity extends AppCompatActivity {
-    protected bellande_radar_service storageUsageService;
+    protected bellande_radar_service radarService;
     protected String connectivityPasscode;
 
     public bellande_radar_activity(Context context) {
         Map<String, Object> config = loadConfigFromFile(context);
         String apiUrl = (String) config.get("url");
         Map<String, String> endpointPaths = (Map<String, String>) config.get("endpoint_path");
-        String inputEndpoint = endpointPaths.get("input_data");
-        String outputEndpoint = endpointPaths.get("output_data");
+        String radarEndpoint = endpointPaths.get("radar");
         String apiAccessKey = (String) config.get("Bellande_Framework_Access_Key");
         this.connectivityPasscode = (String) config.get("connectivity_passcode");
 
-        bellande_radar_api storageUsageApi = new Retrofit.Builder()
+        bellande_radar_api radarApi = new Retrofit.Builder()
                 .baseUrl(apiUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
                 .create(bellande_radar_api.class);
 
-        storageUsageService = new bellande_radar_service(apiUrl, inputEndpoint, outputEndpoint, apiAccessKey, storageUsageApi);
+        radarService = new bellande_radar_service(apiUrl, radarEndpoint, apiAccessKey, radarApi);
     }
 
     @SuppressLint("LongLogTag")
@@ -60,7 +60,7 @@ public class bellande_radar_activity extends AppCompatActivity {
             Type type = new TypeToken<Map<String, Object>>(){}.getType();
             return new Gson().fromJson(reader, type);
         } catch (IOException e) {
-            Log.e("bellande_radar_base_activity", "Error reading config file: " + e.getMessage());
+            Log.e("bellande_radar_activity", "Error reading config file: " + e.getMessage());
         }
         return null;
     }
