@@ -16,6 +16,7 @@
  **/
 package com.bellande_api.bellande_camera;
 
+import com.bellande_api.bellande_camera.bellande_camera_api;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,11 +37,11 @@ public class bellande_camera_service {
         this.streamEndpoint = streamEndpoint;
     }
 
-    public BellandeResponse streamVideo(File videoFile, String connectivityPasscode) throws IOException {
+    public bellande_camera_api.BellandeResponse streamVideo(File videoFile, String connectivityPasscode) throws IOException {
         RequestBody videoBody = RequestBody.create(MediaType.parse("video/*"), videoFile);
         MultipartBody.Part videoPart = MultipartBody.Part.createFormData("video", videoFile.getName(), videoBody);
 
-        Response<BellandeResponse> response = cameraApi.streamVideo(streamEndpoint, videoPart, connectivityPasscode, apiAccessKey).execute();
+        Response<bellande_camera_api.BellandeResponse> response = cameraApi.streamVideo(streamEndpoint, videoPart, connectivityPasscode, apiAccessKey).execute();
         if (!response.isSuccessful()) {
             throw new IOException("Failed to stream video: " + response.code() + " - " + response.message());
         }

@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- **/
+ */
 package com.bellande_api.bellande_camera;
 
 import android.annotation.SuppressLint;
@@ -45,9 +45,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class bellande_camera_activity extends AppCompatActivity {
     protected bellande_camera_service cameraService;
     protected String connectivityPasscode;
+    private static final int REQUEST_VIDEO_CAPTURE = 1;
 
-    public bellande_camera_activity(Context context) {
-        Map<String, Object> config = loadConfigFromFile(context);
+    private void initializeService() {
+        Map<String, Object> config = loadConfigFromFile(this);
         String apiUrl = (String) config.get("url");
         Map<String, String> endpointPaths = (Map<String, String>) config.get("endpoint_path");
         String streamEndpoint = endpointPaths.get("stream");
@@ -74,20 +75,6 @@ public class bellande_camera_activity extends AppCompatActivity {
             Log.e("bellande_camera_activity", "Error reading config file: " + e.getMessage());
         }
         return null;
-    }
-}
-
-// MainActivity class
-public class MainActivity extends bellande_camera_activity {
-    private static final int REQUEST_VIDEO_CAPTURE = 1;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        Button streamButton = findViewById(R.id.streamButton);
-        streamButton.setOnClickListener(v -> startVideoCapture());
     }
 
     private void startVideoCapture() {
