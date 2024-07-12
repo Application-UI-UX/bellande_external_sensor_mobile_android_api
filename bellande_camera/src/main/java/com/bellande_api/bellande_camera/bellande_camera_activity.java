@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
+ **/
 package com.bellande_api.bellande_camera;
 
 import android.annotation.SuppressLint;
@@ -47,7 +47,7 @@ public class bellande_camera_activity extends AppCompatActivity {
     protected String connectivityPasscode;
     private static final int REQUEST_VIDEO_CAPTURE = 1;
 
-    private void initializeService() {
+    public bellande_camera_activity() {
         Map<String, Object> config = loadConfigFromFile(this);
         String apiUrl = (String) config.get("url");
         Map<String, String> endpointPaths = (Map<String, String>) config.get("endpoint_path");

@@ -13,60 +13,38 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- **/
-
+ */
 package com.bellande_api.bellande_lidar;
 
-import java.io.File;
 import java.io.IOException;
-
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class bellande_lidar_service {
-    private final bellande_lidar_api ramUsageApi;
+    private final bellande_lidar_api lidarApi;
     private final String apiAccessKey;
-    private final String inputEndpoint;
-    private final String outputEndpoint;
+    private final String lidarEndpoint;
 
-    public bellande_lidar_service(String apiUrl, String inputEndpoint, String outputEndpoint, String apiAccessKey, bellande_lidar_api ramUsageApi) {
-        this.ramUsageApi = ramUsageApi;
+    public bellande_lidar_service(String apiUrl, String lidarEndpoint, String apiAccessKey, bellande_lidar_api lidarApi) {
+        this.lidarApi = lidarApi;
         this.apiAccessKey = apiAccessKey;
-        this.inputEndpoint = inputEndpoint;
-        this.outputEndpoint = outputEndpoint;
+        this.lidarEndpoint = lidarEndpoint;
     }
 
-    public String getLidarUsage(String connectivityPasscode) {
-        bellande_lidar_api.RequestBody apiRequestBody = new bellande_lidar_api.RequestBody("get_lidar", connectivityPasscode);
-
-        try {
-            Response<bellande_lidar_api.BellandeResponse> response = ramUsageApi.getBellandeResponse(inputEndpoint, apiRequestBody, apiAccessKey).execute();
-            if (response.isSuccessful() && response.body() != null) {
-                return response.body().getCameraUsage();
-            } else {
-                throw new RuntimeException("Error getting LIDAR usage: " + response.code() + " - " + response.message());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Error getting LIDAR usage: " + e.getMessage());
+    public bellande_lidar_api.BellandeResponse sendLidarData(String lidarData, String connectivityPasscode) throws IOException {
+        bellande_lidar_api.RequestBody requestBody = new bellande_lidar_api.RequestBody(connectivityPasscode, "send_data", lidarData);
+        Response<bellande_lidar_api.BellandeResponse> response = lidarApi.sendLidarData(lidarEndpoint, requestBody, apiAccessKey).execute();
+        if (!response.isSuccessful()) {
+            throw new IOException("Failed to send LiDAR data: " + response.code() + " - " + response.message());
         }
+        return response.body();
     }
 
-    public String sendLidarUsage(String cpuUsage, String connectivityPasscode) {
-        bellande_lidar_api.RequestBody apiRequestBody = new bellande_lidar_api.RequestBody(cpuUsage, connectivityPasscode);
-
-        try {
-            Response<bellande_lidar_api.BellandeResponse> response = ramUsageApi.sendBellandeResponse(outputEndpoint, apiRequestBody, apiAccessKey).execute();
-            if (response.isSuccessful() && response.body() != null) {
-                return response.body().getStatus();
-            } else {
-                throw new RuntimeException("Error sending LIDAR usage: " + response.code() + " - " + response.message());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Error sending LIDAR usage: " + e.getMessage());
+    public String receiveLidarData(String connectivityPasscode) throws IOException {
+        bellande_lidar_api.RequestBody requestBody = new bellande_lidar_api.RequestBody(connectivityPasscode, "receive_data", null);
+        Response<bellande_lidar_api.BellandeResponse> response = lidarApi.receiveLidarData(lidarEndpoint, requestBody, apiAccessKey).execute();
+        if (!response.isSuccessful()) {
+            throw new IOException("Failed to receive LiDAR data: " + response.code() + " - " + response.message());
         }
+        return response.body().getLidarData();
     }
 }

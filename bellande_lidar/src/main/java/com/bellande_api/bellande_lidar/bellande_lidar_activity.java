@@ -18,6 +18,7 @@ package com.bellande_api.bellande_lidar;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.gson.Gson;
@@ -31,25 +32,26 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class bellande_lidar_activity extends AppCompatActivity {
-    protected bellande_lidar_service ramUsageService;
+    protected bellande_lidar_service lidarService;
     protected String connectivityPasscode;
+
+    private static final int REQUEST_LIDAR_CAPTURE = 1;
 
     public bellande_lidar_activity(Context context) {
         Map<String, Object> config = loadConfigFromFile(context);
         String apiUrl = (String) config.get("url");
         Map<String, String> endpointPaths = (Map<String, String>) config.get("endpoint_path");
-        String inputEndpoint = endpointPaths.get("input_data");
-        String outputEndpoint = endpointPaths.get("output_data");
+        String lidarEndpoint = endpointPaths.get("lidar");
         String apiAccessKey = (String) config.get("Bellande_Framework_Access_Key");
         this.connectivityPasscode = (String) config.get("connectivity_passcode");
 
-        bellande_lidar_api ramUsageApi = new Retrofit.Builder()
+        bellande_lidar_api lidarApi = new Retrofit.Builder()
                 .baseUrl(apiUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
                 .create(bellande_lidar_api.class);
 
-        ramUsageService = new bellande_lidar_service(apiUrl, inputEndpoint, outputEndpoint, apiAccessKey, ramUsageApi);
+        lidarService = new bellande_lidar_service(apiUrl, lidarEndpoint, apiAccessKey, lidarApi);
     }
 
     @SuppressLint("LongLogTag")
@@ -60,7 +62,7 @@ public class bellande_lidar_activity extends AppCompatActivity {
             Type type = new TypeToken<Map<String, Object>>(){}.getType();
             return new Gson().fromJson(reader, type);
         } catch (IOException e) {
-            Log.e("bellande_lidar_base_activity", "Error reading config file: " + e.getMessage());
+            Log.e("bellande_lidar_activity", "Error reading config file: " + e.getMessage());
         }
         return null;
     }
