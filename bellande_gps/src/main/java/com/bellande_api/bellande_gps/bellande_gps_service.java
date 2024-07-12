@@ -13,60 +13,29 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- **/
-
+ */
 package com.bellande_api.bellande_gps;
 
-import java.io.File;
 import java.io.IOException;
-
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class bellande_gps_service {
-    private final bellande_gps_api networkUsageApi;
+    private final bellande_gps_api gpsApi;
     private final String apiAccessKey;
-    private final String inputEndpoint;
-    private final String outputEndpoint;
+    private final String gpsEndpoint;
 
-    public bellande_gps_service(String apiUrl, String inputEndpoint, String outputEndpoint, String apiAccessKey, bellande_gps_api networkUsageApi) {
-        this.networkUsageApi = networkUsageApi;
+    public bellande_gps_service(String apiUrl, String gpsEndpoint, String apiAccessKey, bellande_gps_api gpsApi) {
+        this.gpsApi = gpsApi;
         this.apiAccessKey = apiAccessKey;
-        this.inputEndpoint = inputEndpoint;
-        this.outputEndpoint = outputEndpoint;
+        this.gpsEndpoint = gpsEndpoint;
     }
 
-    public String getGpsUsage(String connectivityPasscode) {
-        bellande_gps_api.RequestBody apiRequestBody = new bellande_gps_api.RequestBody("get_gps", connectivityPasscode);
-
-        try {
-            Response<bellande_gps_api.BellandeResponse> response = networkUsageApi.getBellandeResponse(inputEndpoint, apiRequestBody, apiAccessKey).execute();
-            if (response.isSuccessful() && response.body() != null) {
-                return response.body().getCameraUsage();
-            } else {
-                throw new RuntimeException("Error getting GPS usage: " + response.code() + " - " + response.message());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Error getting GPS usage: " + e.getMessage());
+    public bellande_gps_api.BellandeResponse sendGpsData(String gpsData, String connectivityPasscode) throws IOException {
+        bellande_gps_api.RequestBody requestBody = new bellande_gps_api.RequestBody(connectivityPasscode, gpsData);
+        Response<bellande_gps_api.BellandeResponse> response = gpsApi.sendGpsData(gpsEndpoint, requestBody, apiAccessKey).execute();
+        if (!response.isSuccessful()) {
+            throw new IOException("Failed to send GPS data: " + response.code() + " - " + response.message());
         }
-    }
-
-    public String sendGpsUsage(String cpuUsage, String connectivityPasscode) {
-        bellande_gps_api.RequestBody apiRequestBody = new bellande_gps_api.RequestBody(cpuUsage, connectivityPasscode);
-
-        try {
-            Response<bellande_gps_api.BellandeResponse> response = networkUsageApi.sendBellandeResponse(outputEndpoint, apiRequestBody, apiAccessKey).execute();
-            if (response.isSuccessful() && response.body() != null) {
-                return response.body().getStatus();
-            } else {
-                throw new RuntimeException("Error sending GPS usage: " + response.code() + " - " + response.message());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Error sending GPS usage: " + e.getMessage());
-        }
+        return response.body();
     }
 }

@@ -24,31 +24,38 @@ import retrofit2.http.Url;
 
 public interface bellande_gps_api {
     @POST
-    Call<BellandeResponse> getBellandeResponse(@Url String url, @Body RequestBody body, @Header("Bellande-Framework-Access-Key") String apiKey);
-
-    @POST
-    Call<BellandeResponse> sendBellandeResponse(@Url String url, @Body RequestBody body, @Header("Bellande-Framework-Access-Key") String apiKey);
+    Call<BellandeResponse> sendGpsData(@Url String url, 
+                                       @Body RequestBody body,
+                                       @Header("Bellande-Framework-Access-Key") String apiKey);
 
     class RequestBody {
-        private final String input;
         private final String connectivityPasscode;
+        private final String gpsData;
 
-        public RequestBody(String input, String connectivityPasscode) {
-            this.input = input;
+        public RequestBody(String connectivityPasscode, String gpsData) {
             this.connectivityPasscode = connectivityPasscode;
+            this.gpsData = gpsData;
+        }
+
+        public String getConnectivityPasscode() {
+            return connectivityPasscode;
+        }
+
+        public String getGpsData() {
+            return gpsData;
         }
     }
 
     class BellandeResponse {
-        private String cpuUsage;
         private String status;
-
-        public String getCameraUsage() {
-            return cpuUsage;
-        }
+        private String message;
 
         public String getStatus() {
             return status;
+        }
+
+        public String getMessage() {
+            return message;
         }
     }
 }
